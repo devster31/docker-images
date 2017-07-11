@@ -10,6 +10,10 @@ RUN mkdir /bliss
 
 ADD bliss-runner.sh /bliss/
 
+ADD root/ /
+
+RUN [ "cross-build-start" ]
+
 RUN chmod +x /bliss/bliss-runner.sh
 
 RUN apk add --update \
@@ -21,6 +25,8 @@ RUN wget -qO- http://www.blisshq.com/app/latest-linux-version | xargs wget -O bl
 
 RUN echo INSTALL_PATH=/bliss > auto-install.properties
 RUN java -jar bliss-install-latest.jar -console -options auto-install.properties
+
+RUN [ "cross-build-end" ]
 
 WORKDIR /bliss
 
