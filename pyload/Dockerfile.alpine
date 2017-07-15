@@ -1,0 +1,72 @@
+FROM lsiobase/alpine.armhf
+
+RUN apk --no-cache --update add \
+      # boost-dev \
+      curl \
+      curl-dev \
+      # freetype \
+      # freetype-dev \
+      g++ \
+      gcc \
+      git \
+      # jpeg \
+      # jpeg-dev
+      # lcms2 \
+      libev-dev \
+      libffi-dev \
+      # libjpeg \
+      libressl-dev \
+      # libtiff \
+      # libwebp \
+      # libwebp-dev \
+      # libxml2 \
+      # libxml2-dev \
+      # nodejs \
+      # nodejs-dev \
+      python-dev \
+      python2 \
+      py-imaging \
+      # tcl \
+      # tcl-dev \
+      tesseract-ocr \
+      # tiff \
+      # tiff-dev \
+      # tk \
+      # tk-dev \
+      util-linux
+
+ENV RHINO_VERSION=1.7.7.1
+RUN cd /tmp && \
+    apk --no-cache --update add \
+      openjdk8-jre && \
+    curl -sSL https://github.com/mozilla/rhino/releases/download/Rhino${RHINO_VERSION//\./_}_RELEASE/rhino-${RHINO_VERSION}.zip -O && \
+    unzip -q rhino-${RHINO_VERSION}.zip && \
+    mkdir -p /usr/share/java && \
+    mv rhino${RHINO_VERSION}/lib/rhino-${RHINO_VERSION}.jar /usr/share/java/rhino-${RHINO_VERSION}.jar && \
+    ln -s /usr/share/java/rhino-${RHINO_VERSION}.jar /usr/share/java/js.jar
+
+# RUN agetty --no-clear --keep-baud console 115200,38400,9600 xterm
+
+RUN mkdir -p /app && cd /app && \
+    git clone https://github.com/pyload/pyload -b stable && \
+    echo "/config" > /app/pyload/module/config/configdir && \
+    python -m ensurepip --upgrade && \
+    pip --no-cache install -U setuptools wheel && \
+    pip --no-cache install \
+      Beaker \
+      bjoern \
+      # BeautifulSoup \
+      # colorama \
+      # feedparser \
+      # jinja2 \
+      # Pillow \
+      pycurl \
+      pycrypto \
+      pyOpenSSL
+      # Spidermonkey \
+      # thrift
+
+ADD root/ /
+WORKDIR /app
+EXPOSE 8000
+VOLUME /config /downloads

@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+# copy config
+[[ ! -s /config/pyload.conf ]] && \
+    cp /defaults/pyload.conf /config/pyload.conf
+
+# permissions
+chown -R abc:abc \
+    /app \
+    /config
