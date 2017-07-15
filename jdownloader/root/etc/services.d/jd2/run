@@ -1,0 +1,8 @@
+#!/usr/bin/execlineb -S0
+/usr/bin/with-contenv
+umask 022
+importas -D "-Xmx256m" opts JAVA_OPTS
+
+redirfd -w 2 /dev/null
+s6-setuidgid abc
+/usr/bin/java -Djava.awt.headless=true ${opts} -jar /app/jd2/JDownloader.jar -norestart
