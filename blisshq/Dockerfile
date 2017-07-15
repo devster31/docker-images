@@ -6,13 +6,13 @@ VOLUME /config
 
 EXPOSE 3220 3221
 
-RUN mkdir /bliss
-
-ADD bliss-runner.sh /bliss/
-
 ADD root/ /
 
 RUN [ "cross-build-start" ]
+
+RUN mkdir /bliss
+
+ADD bliss-runner.sh /bliss/
 
 RUN chmod +x /bliss/bliss-runner.sh
 
