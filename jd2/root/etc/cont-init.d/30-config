@@ -3,8 +3,8 @@
 # copy config
 [[ ! -s /app/jd2/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json ]] && \
     cp /defaults/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json /app/jd2/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json && \
-    sed -i -e s~#EMAIL~${EMAIL}~g /app/jd2/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json && \
-    sed -i -e s~#PASSWORD~${PASSWORD}~g /app/jd2/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json
+    sed -i -e s~%EMAIL%~${EMAIL}~g /app/jd2/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json && \
+    sed -i -e s~%PASSWORD%~${PASSWORD}~g /app/jd2/cfg/org.jdownloader.api.myjdownloader.MyJDownloaderSettings.json
 
 [[ ! -s /app/jd2/cfg/org.jdownloader.settings.GeneralSettings.json ]] && \
     cp /defaults/org.jdownloader.settings.GeneralSettings.json /app/jd2/cfg/org.jdownloader.settings.GeneralSettings.json
@@ -13,4 +13,4 @@
 chown -R abc:abc \
     /app \
     /config \
-	/downloads
+    /downloads
