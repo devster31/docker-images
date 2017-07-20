@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+PIP_EXTRA=${PIP_EXTRA:-x}
+
+if [[ $PIP_EXTRA != "x" && ! -z $PIP_EXTRA ]]
+then
+  pip3 install --no-cache-dir $PIP_EXTRA
+fi

@@ -1,19 +1,49 @@
-FROM resin/raspberrypi3-alpine
+FROM lsiobase/alpine.armhf
 
-RUN apk add --update \
-       ca-certificates \
-       git \
-       python \
-       py-pip \
-    && rm -rf /var/cache/apk/*
+COPY qemu-arm-static /usr/bin/
+# Resin-xbuild
+COPY resin-xbuild /usr/bin/
+RUN ln -s resin-xbuild /usr/bin/cross-build-start && \
+    ln -s resin-xbuild /usr/bin/cross-build-end
 
-RUN git clone https://github.com/Flexget/Flexget.git /flexget
-WORKDIR /flexget
+# set version label
+#ARG BUILD_DATE
+#ARG VERSION
+#LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 
-RUN pip install paver
-RUN pip install -e .
+ENV \
+    XDG_CONFIG_HOME="/config/xdg" \
+    XDG_DATA_HOME="/config/local/share"
 
-RUN mkdir /root/.flexget
-VOLUME /root/.flexget
+# set python to use utf-8 rather than ascii
+ENV PYTHONIOENCODING="UTF-8"
 
-CMD ["flexget"]
+RUN [ "cross-build-start" ]
+
+# install build packages
+RUN apk --update upgrade && \
+    apk del python3* && \
+    echo 'http://dl-cdn.alpinelinux.org/alpine/v3.5/main/' >> /etc/apk/repositories && \
+    apk add --no-cache \
+      git \
+      python3=3.5.2-r9 && \
+    python3 -m ensurepip --upgrade && \
+    pip3 install -U pip setuptools
+
+RUN git clone https://github.com/Flexget/Flexget.git /app/flexget
+WORKDIR /app/flexget
+
+RUN pip3 install -e .
+
+ENV EDITOR="nano" \
+HOME="/config"
+
+# copy local files
+COPY root/ /
+RUN mkdir /config/.flexget
+
+RUN [ "cross-build-end" ]
+
+# ports and volumes
+EXPOSE 5050
+VOLUME /config

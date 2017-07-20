@@ -1,0 +1,12 @@
+schedules:
+  # Run every task once an hour
+  - tasks: '*'
+    interval:
+      days: 1
+
+tasks:
+  test:
+    rss: https://eztv.ag/ezrss.xml
+    series:
+      - Another Show
+    exec: echo "found {{title}} at {{url}}" >> /tmp/flexget.accepted

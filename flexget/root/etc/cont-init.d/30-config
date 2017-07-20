@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+# copy config
+[[ ! -s /config/.flexget/config.yml ]] && \
+    cp /defaults/config.yml /config/.flexget/config.yml
+
+# permissions
+chown -R abc:abc \
+    /app \
+    /config

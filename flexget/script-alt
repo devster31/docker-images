@@ -1,0 +1,7 @@
+#!/usr/bin/execlineb -S0
+with-contenv
+importas -D "" to_install PIP_EXTRA
+ifthenelse
+{ s6-test -n ${to_install} }
+{ pip3 install --no-cache-dir ${to_install} }
+{ exit }
