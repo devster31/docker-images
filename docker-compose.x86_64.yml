@@ -1,0 +1,63 @@
+---
+services:
+  beets:
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+    image: linuxserver/beets
+    ports:
+      - 8337:8337
+    restart: unless-stopped
+    volumes:
+      - "${HOME}.config/beets-docker:/config"
+      - "${HOME}/data/music:/downloads"
+      - "${HOME}/library/music:/music"
+  jd2:
+    build:
+      context: jd2
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+      - "EMAIL=${JD_EMAIL}"
+      - "PASSWORD=${JD_PASS}"
+    restart: unless-stopped
+    volumes:
+      - "${HOME}/downloads/jd2:/downloads"
+      - "${HOME}/.config/jd2:/app/jd2"
+  nextcloud:
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+    image: linuxserver/nextcloud
+    ports:
+      - 4433:443
+    restart: unless-stopped
+    volumes:
+      - "${HOME}/nextcloud/data:/data"
+      - "${HOME}/nextcloud/config:/config"
+      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
+  ombi:
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+    image: linuxserver/ombi
+    ports:
+      - 3579:3579
+    restart: unless-stopped
+    volumes:
+      - "${HOME}/.config/ombi:/config"
+  znc:
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+    image: linuxserver/znc
+    ports:
+      - 6501:6501
+    restart: unless-stopped
+    volumes:
+      - "${HOME}/.znc-docker:/config"
+version: '3'

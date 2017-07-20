@@ -1,0 +1,86 @@
+---
+services:
+  beets:
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+    image: lsioarmhf/beets
+    ports:
+      - 8337:8337
+    restart: unless-stopped
+    volumes:
+      - "${HOME}.config/beets:/config"
+    #  - "${HOME}/data/music:/downloads"
+    #  - "${HOME}/library/music:/music"
+  jd2:
+    build:
+      context: jd2
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+      - "EMAIL=${JD_EMAIL}"
+      - "PASSWORD=${JD_PASS}"
+    restart: unless-stopped
+    volumes:
+      - /mnt/antares/downloads/jd2:/downloads
+      - $HOME/.config/jd2:/app/jd2
+  aria2:
+    build:
+      context: aria2
+      dockerfile: Dockerfile.aria2
+    command:
+      - "aria2c"
+      - "--dir=/downloads"
+    #  - "--log=-"
+      - "--log-level=notice"
+      - "--max-concurrent-downloads=10"
+    #  - "--quiet"
+      - "--follow-torrent=mem"
+      - "--follow-metalink=mem"
+      - "--enable-rpc"
+      - "--rpc-listen-all=true"
+      - "--rpc-secret=${RPC_SECRET}"
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+    ports:
+      - 6800:6800
+    restart: unless-stopped
+    volumes:
+      - /mnt/antares/downloads/aria2:/downloads
+      - $HOME/.aria2:/config
+  aria2-webui:
+    build:
+      context: aria2
+      dockerfile: Dockerfile.webui
+    environment:
+      - "RPC_HOST=${RPC_HOST}"
+      - "RPC_PORT=${RPC_PORT}"
+      - "RPC_SECRET=${RPC_SECRET}"
+    ports:
+      - 8080:80
+#  ombi:
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "TZ=${TZ}"
+#    image: lsioarmhf/ombi
+#    ports:
+#      - 3579:3579
+#    restart: unless-stopped
+#    volumes:
+#      - "${HOME}/.config/ombi:/config"
+#  znc:
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "TZ=${TZ}"
+#    image: lsioarmhf/znc
+#    ports:
+#      - 6501:6501
+#    volumes:
+#      - "${HOME}/.znc-docker:/config"
+version: '3'
