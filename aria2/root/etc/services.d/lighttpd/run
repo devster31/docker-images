@@ -1,0 +1,3 @@
+#!/usr/bin/execlineb -S0
+fdmove -c 2 1
+/usr/sbin/lighttpd -D -f /etc/lighttpd/lighttpd.conf

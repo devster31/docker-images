@@ -1,0 +1,54 @@
+FROM resin/raspberry-pi3-buildpack-deps
+
+MAINTAINER Daniele
+
+RUN echo 'deb http://mirrordirector.raspbian.org/raspbian/ testing main' >> /etc/apt/sources.list.d/testing.list && \
+    buildDeps="autoconf \
+               automake \
+               autopoint \
+               autotools-dev \
+               binutils \
+               curl \
+               dpkg-dev \
+               bzip2 \
+               g++ \
+               gcc \
+               git \
+               libtool \
+               make \
+               pkg-config \
+               libcppunit-dev
+               libssl-dev \
+               libxml2-dev \
+               zlib1g-dev"
+    apt-get update && \
+    apt-get install -t testing -yq --no-install-recommends ${buildDeps} \
+            libgnutls28-dev nettle-dev libgmp-dev libssh2-1-dev libc-ares-dev zlib1g-dev libsqlite3-dev \
+            libexpat1-dev libgcrypt20-dev libgpg-error-dev lzip libuv-dev libtcmalloc-minimal4 && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir aria2
+
+ENV LOCAL_DIR /aria2
+
+RUN mkdir build && cd build && \
+    curl -s 'https://api.github.com/repos/aria2/aria2/releases/latest' | \
+        grep 'browser_download_url.*[0-9]\.tar\.bz2' | sed -e 's/^[[:space:]]*//' | \
+        cut -d ' ' -f 2 | xargs -I % curl -Ls -o - '%' | tar xjf - --strip-components=1 && \
+    ./configure \
+        --with-libuv \
+        --without-gnutls \
+        --enable-libaria2 \
+        --disable-shared \
+        --enable-static \
+        --without-libxml2 \
+        --with-libexpat \
+        --with-libz \
+        --prefix=${LOCAL_DIR} \
+        LDFLAGS="-L$LOCAL_DIR/lib" \
+        PKG_CONFIG_PATH="$LOCAL_DIR/lib/pkgconfig" \
+        ARIA2_STATIC=yes && \
+    make -s && \
+    make -s install-strip
+
+RUN mkdir dist && tar -czv -f /dist/aria2-`/aria2/bin/aria2c -v | grep 'aria2 version' | cut -d ' ' -f3`.tar.gz aria2

@@ -1,0 +1,21 @@
+FROM lsiobase/alpine.armhf
+
+ENV \
+    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+    WEBUI_ARIA2_VERSION=latest
+
+RUN set -eux && \
+
+    # Install packages
+    apk --no-cache --update add  \
+        curl \
+        git \
+        lighttpd && \
+
+    git clone https://github.com/ziahamza/webui-aria2 /app/www && \
+    rm -f -r /tmp/*
+
+ADD root/ /
+
+# ports and volumes
+EXPOSE 80

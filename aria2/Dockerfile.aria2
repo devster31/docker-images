@@ -1,0 +1,67 @@
+FROM lsiobase/alpine.armhf
+
+ENV \
+    ARIA2_VERSION=latest \
+    XDG_CONFIG_HOME=/config/xdg \
+    XDG_CACHE_HOME=/config/cache
+
+RUN apk add --no-cache --no-progress --virtual BUILD_DEPS \
+        autoconf \
+        automake \
+        build-base \
+        c-ares-dev \
+        cppunit-dev \
+        expat-dev \
+        gettext-dev \
+        git \
+        libssh2-dev \
+        libtool \
+        libuv-dev \
+        libxml2-dev \
+        openssl-dev \
+        python3 \
+        sqlite-dev \
+        zlib && \
+    apk add --no-cache --no-progress \
+        c-ares \
+        ca-certificates \
+        cppunit \
+        curl \
+        expat \
+        libintl \
+        libstdc++ \
+        libssh2 \
+        libuv \
+        libxml2 \
+        openssl \
+        sqlite-libs \
+        zlib-dev && \
+
+#    curl -SL https://api.github.com/repos/stedolan/jq/releases/latest | \
+#        python3 -c 'import json, sys; obj=json.load(sys.stdin); print([e.get("url") for e in obj.get("assets") if e.get("name") == "jq-linux64"])' | \
+#        cut -d "'" -f2 | \
+#        awk '{ print "url="$1 }' | \
+#        curl -SL -H 'Accept: application/octet-stream' -K- -o /usr/local/bin/jq && \
+#        chmod +x /usr/local/bin/jq \
+    cd /tmp && \
+    git clone https://github.com/aria2/aria2.git && \
+    cd aria2 && \
+    if [[ "${ARIA2_VERSION}" != "latest" ]]; \
+    then \
+        git checkout -t "release-${ARIA2_VERSION}"; \
+    fi && \
+    autoreconf -i && \
+    ./configure \
+        --enable-libaria2 \
+        --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
+        --with-libexpat \
+        --with-libuv \
+        --with-libz \
+        --without-gnutls \
+        --without-libxml2 \
+        --prefix="/app/aria2" && \
+    make && \
+    make install && \
+
+    apk del --no-progress BUILD_DEPS && \
+    rm -f -r /tmp/*
