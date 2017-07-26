@@ -3,15 +3,25 @@ set -eux
 
 HOST=$(getent hosts ${RPC_HOST} | awk '{ print $1 }')
 # copy config
-[[ ! -s /etc/lighttpd/lighttpd.conf ]] && \
-    cp /defaults/lighttpd.conf /etc/lighttpd/lighttpd.conf
+# [[ ! -s /etc/lighttpd/lighttpd.conf ]] && \
+mv /etc/h2o.conf /etc/h2o.conf.default
+cp /defaults/h2o.conf /etc/h2o.conf
+
+PID_DIR=/var/run/h2o
+
+[[ ! -d "${PID_DIR}" ]] && \
+    mkdir -p "${PID_DIR}"
+
+[[ $(stat -c %U "${PID_DIR}") == "h2o" ]] || chown h2o "${PID_DIR}"
+# [[ $(stat -c %G "${PID_DIR}") == "h2o" ]] || chgrp h2o "${PID_DIR}"
+
 # sed -i -e "s~host:\(.*\) 'localhost',~host:\1 '${HOST:-localhost}',~g" /app/www/configuration.js
 sed -i -e "s~host:\(.*\) 'localhost',~host: '${HOST:-localhost}',~g" /app/www/configuration.js
 sed -i -e "s~port: \d\+,~port: ${RPC_PORT:-6800},~g" /app/www/configuration.js
 sed -i -e "s~// token:.*~  token: '${RPC_SECRET:-}'~g" /app/www/configuration.js
 
-chown -R lighttpd:lighttpd \
+chown -R h2o \
     /app
 
-chown -R abc:abc \
-    /config
+# chown -R abc:abc \
+#     /config

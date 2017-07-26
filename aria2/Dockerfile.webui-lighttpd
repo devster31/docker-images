@@ -8,14 +8,14 @@ RUN set -eu && \
 
     # Install packages
     apk --no-cache --update add  \
+        curl \
         git \
-        h2o && \
+        lighttpd && \
 
     git clone https://github.com/ziahamza/webui-aria2 /app/www && \
-    apk del git && \
     rm -f -r /tmp/*
 
-ADD root.h2o/ /
+ADD root.lighttpd/ /
 
 # ports and volumes
 EXPOSE 80

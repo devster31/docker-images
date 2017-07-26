@@ -1,0 +1,3 @@
+#!/usr/bin/execlineb -P
+
+/usr/bin/h2o --mode master --conf /etc/h2o.conf

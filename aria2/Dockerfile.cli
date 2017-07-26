@@ -5,7 +5,8 @@ ENV \
     XDG_CONFIG_HOME=/config/xdg \
     XDG_CACHE_HOME=/config/cache
 
-RUN apk add --no-cache --no-progress --virtual BUILD_DEPS \
+RUN set -eu \
+    apk add --no-cache --no-progress --virtual BUILD_DEPS \
         autoconf \
         automake \
         build-base \
@@ -21,21 +22,20 @@ RUN apk add --no-cache --no-progress --virtual BUILD_DEPS \
         openssl-dev \
         python3 \
         sqlite-dev \
-        zlib && \
+        zlib-dev && \
     apk add --no-cache --no-progress \
         c-ares \
         ca-certificates \
-        cppunit \
         curl \
         expat \
         libintl \
         libstdc++ \
         libssh2 \
         libuv \
-        libxml2 \
+    #    libxml2 \
         openssl \
         sqlite-libs \
-        zlib-dev && \
+    #    zlib \
 
 #    curl -SL https://api.github.com/repos/stedolan/jq/releases/latest | \
 #        python3 -c 'import json, sys; obj=json.load(sys.stdin); print([e.get("url") for e in obj.get("assets") if e.get("name") == "jq-linux64"])' | \
@@ -43,7 +43,8 @@ RUN apk add --no-cache --no-progress --virtual BUILD_DEPS \
 #        awk '{ print "url="$1 }' | \
 #        curl -SL -H 'Accept: application/octet-stream' -K- -o /usr/local/bin/jq && \
 #        chmod +x /usr/local/bin/jq \
-    cd /tmp && \
+
+    && cd /tmp && \
     git clone https://github.com/aria2/aria2.git && \
     cd aria2 && \
     if [[ "${ARIA2_VERSION}" != "latest" ]]; \
@@ -61,7 +62,11 @@ RUN apk add --no-cache --no-progress --virtual BUILD_DEPS \
         --without-libxml2 \
         --prefix="/app/aria2" && \
     make && \
-    make install && \
+    make install-strip && \
 
     apk del --no-progress BUILD_DEPS && \
     rm -f -r /tmp/*
+
+ENV PATH /app/aria2/bin:$PATH
+VOLUME /downloads
+ENTRYPOINT [ "aria2c" ]
