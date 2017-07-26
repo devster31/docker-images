@@ -21,16 +21,17 @@ ENV PYTHONIOENCODING="UTF-8"
 RUN [ "cross-build-start" ]
 
 # install build packages
-RUN apk --update upgrade && \
+RUN set -eu \
+    apk --update upgrade && \
     apk del python3* && \
     echo 'http://dl-cdn.alpinelinux.org/alpine/v3.5/main/' >> /etc/apk/repositories && \
     apk add --no-cache \
       git \
-      python3=3.5.2-r9 && \
-    python3 -m ensurepip --upgrade && \
-    pip3 install -U pip setuptools
+      python3=3.5.2-r9 \
+    && python3 -m ensurepip --upgrade \
+    && pip3 install -U pip setuptools \
+    && git clone https://github.com/Flexget/Flexget.git /app/flexget
 
-RUN git clone https://github.com/Flexget/Flexget.git /app/flexget
 WORKDIR /app/flexget
 
 RUN pip3 install -e .
