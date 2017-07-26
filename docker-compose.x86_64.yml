@@ -1,63 +1,73 @@
 ---
 services:
-  beets:
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
-      - "TZ=${TZ}"
-    image: linuxserver/beets
-    ports:
-      - 8337:8337
-    restart: unless-stopped
-    volumes:
-      - "${HOME}.config/beets-docker:/config"
-      - "${HOME}/data/music:/downloads"
-      - "${HOME}/library/music:/music"
-  jd2:
+  flood:
     build:
-      context: jd2
+      context: flood
     environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
+      - "FLOOD_BASE_URI=${FLOOD_BASE_URI:-/}"
+      - "FLOOD_SECRET=${FLOOD_SECRET}"
+      - "RTORRENT_SCGI_HOST=${RTORRENT_SCGI_HOST:-127.0.0.1}"
+      - "RTORRENT_SCGI_PORT=${RTORRENT_SCGI_PORT:-5000}"
+      - "RTORRENT_SOCK=${RTORRENT_SOCK:-false}"
+      - "FLOOD_ENABLE_SSL=${FLOOD_ENABLE_SSL:-false}"
+    labels:
+      - ovh.dispenser.flood
+    network_mode: "host"
+    restart: unless-stopped
+    volumes:
+      - "./data/flood:/data"
+  syncthing:
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
       - "TZ=${TZ}"
-      - "EMAIL=${JD_EMAIL}"
-      - "PASSWORD=${JD_PASS}"
-    restart: unless-stopped
-    volumes:
-      - "${HOME}/downloads/jd2:/downloads"
-      - "${HOME}/.config/jd2:/app/jd2"
-  nextcloud:
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
-    image: linuxserver/nextcloud
+    image: linuxserver/syncthing
+    labels:
+      - ovh.dispenser.syncthing
     ports:
-      - 4433:443
+      - 8384:8384
+      - 22000:22000
+      - 21027:21027/udp
     restart: unless-stopped
     volumes:
-      - "${HOME}/nextcloud/data:/data"
-      - "${HOME}/nextcloud/config:/config"
-      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
-  ombi:
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
+      - "./data/syncthing:/config"
+      - "${HOME}/library/movies:/mnt/movies"
+   radarr:
+     environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
       - "TZ=${TZ}"
-    image: linuxserver/ombi
+     image: linuxserver/radarr
+     labels:
+      - ovh.dispenser.radarr
     ports:
-      - 3579:3579
+      - 127.0.0.1:7878:7878
     restart: unless-stopped
     volumes:
-      - "${HOME}/.config/ombi:/config"
-  znc:
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
-      - "TZ=${TZ}"
-    image: linuxserver/znc
-    ports:
-      - 6501:6501
-    restart: unless-stopped
-    volumes:
-      - "${HOME}/.znc-docker:/config"
+      - "./data/radarr:/config"
+      - "${HOME}/data/movies:/downloads"
+      - "${HOME}/library/movies:/movies"
+#  nextcloud:
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#    image: linuxserver/nextcloud
+#    ports:
+#      - 4433:443
+#    restart: unless-stopped
+#    volumes:
+#      - "${HOME}/nextcloud/data:/data"
+#      - "${HOME}/nextcloud/config:/config"
+#      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
+#  znc:
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "TZ=${TZ}"
+#    image: linuxserver/znc
+#    ports:
+#      - 6501:6501
+#    restart: unless-stopped
+#    volumes:
+#      - "${HOME}/.znc-docker:/config"
 version: '3'
