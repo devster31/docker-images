@@ -1,0 +1,10 @@
+#!/usr/bin/execlineb -P
+/usr/bin/with-contenv
+importas sleep_for CERTBOT_SLEEP
+fdmove -c 2 1
+#foreground { sleep $sleep_for }
+# s6-sleep $sleep_for
+foreground {
+    certbot certificates
+}
+sleep $sleep_for

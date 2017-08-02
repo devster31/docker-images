@@ -1,0 +1,4 @@
+#!/usr/bin/execlineb -P
+/usr/bin/with-contenv
+importas docker_host DOCKER_HOST
+/usr/local/bin/docker-gen -watch -config /etc/docker-gen/docker-gen.cfg -endpoint $docker_host

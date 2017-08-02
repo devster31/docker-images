@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+set -eux
+
+# copy config
+[[ ! -s /etc/docker-gen/docker-gen.cfg ]] && \
+    cp /defaults/docker-gen.cfg /etc/docker-gen/docker-gen.cfg
+
+mkdir -p /etc/docker-gen/templates
+mkdir -p /etc/nginx/conf.d
+
+CONFIGS='cli.ini.tmpl vhost.conf.tmpl'
+
+for file in ${CONFIGS}
+do
+    [[ ! -s ${file} ]]
+    cp /defaults/${file} /etc/docker-gen/templates/${file}
+done
