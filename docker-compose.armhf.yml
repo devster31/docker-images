@@ -1,67 +1,88 @@
 ---
 services:
-  beets:
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
-      - "TZ=${TZ}"
-    image: lsioarmhf/beets
-    ports:
-      - 8337:8337
-    restart: unless-stopped
-    volumes:
-      - "${HOME}.config/beets:/config"
-    #  - "${HOME}/data/music:/downloads"
-    #  - "${HOME}/library/music:/music"
-  jd2:
-    build:
-      context: jd2
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
-      - "TZ=${TZ}"
-      - "EMAIL=${JD_EMAIL}"
-      - "PASSWORD=${JD_PASS}"
-    restart: unless-stopped
-    volumes:
-      - /mnt/antares/downloads/jd2:/downloads
-      - $HOME/.config/jd2:/app/jd2
-  aria2:
-    build:
-      context: aria2
-      dockerfile: Dockerfile.aria2
-    command:
-      - "aria2c"
-      - "--dir=/downloads"
-    #  - "--log=-"
-      - "--log-level=notice"
-      - "--max-concurrent-downloads=10"
-    #  - "--quiet"
-      - "--follow-torrent=mem"
-      - "--follow-metalink=mem"
-      - "--enable-rpc"
-      - "--rpc-listen-all=true"
-      - "--rpc-secret=${RPC_SECRET}"
-    environment:
-      - "PUID=${UID}"
-      - "PGID=${GID}"
-      - "TZ=${TZ}"
-    ports:
-      - 6800:6800
-    restart: unless-stopped
-    volumes:
-      - /mnt/antares/downloads/aria2:/downloads
-      - $HOME/.aria2:/config
-  aria2-webui:
-    build:
-      context: aria2
-      dockerfile: Dockerfile.webui
-    environment:
-      - "RPC_HOST=${RPC_HOST}"
-      - "RPC_PORT=${RPC_PORT}"
-      - "RPC_SECRET=${RPC_SECRET}"
-    ports:
-      - 8080:80
+#  aria2:
+#    build:
+#      context: aria2
+#      dockerfile: Dockerfile.cli
+#    command:
+#      - "--dir=/downloads"
+#      - "--log=-"
+#      - "--log-level=notice"
+#      - "--max-concurrent-downloads=10"
+#      - "--quiet"
+#      - "--input-file=/config/aria2.session"
+#      - "--save-session=/config/aria2.session"
+#      - "--follow-torrent=mem"
+#      - "--follow-metalink=mem"
+#      - "--seed-ratio=1.5"
+#      - "--seed-time=20160"
+#      - "--enable-rpc"
+#      - "--rpc-listen-all=true"
+#      - "--rpc-listen-port=${RPC_PORT}"
+#      - "--rpc-secret='${RPC_SECRET}'"
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "TZ=${TZ}"
+#    ports:
+#      - "${RPC_PORT}:${RPC_PORT}"
+#    restart: unless-stopped
+#    volumes:
+#      - /mnt/antares/downloads/aria2:/downloads
+#    #  - "${MOUNT}/aria2:/config"
+#  aria2-webui:
+#    build:
+#      context: aria2
+#      dockerfile: Dockerfile.webui
+#    depends_on:
+#      - aria2
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "RPC_HOST=${RPC_HOST}"
+#      - "RPC_PORT=${RPC_PORT}"
+#      - "RPC_SECRET=${RPC_SECRET}"
+#      - "TZ=${TZ}"
+#    ports:
+#      - 8080:80
+#  beets:
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "TZ=${TZ}"
+#    image: lsioarmhf/beets
+#    ports:
+#      - 8337:8337
+#    restart: unless-stopped
+#    volumes:
+#      - "${MOUNT}/beets:/config"
+#    #  - "${HOME}/data/music:/downloads"
+#    #  - "${HOME}/library/music:/music"
+#  jd2:
+#    build:
+#      context: jd2
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#      - "TZ=${TZ}"
+#      - "EMAIL=${JD_EMAIL}"
+#      - "PASSWORD=${JD_PASS}"
+#    restart: unless-stopped
+#    volumes:
+#      - /mnt/antares/downloads/jd2:/downloads
+#      - "${MOUNT}/jd2:/app/jd2"
+#  nextcloud:
+#    environment:
+#      - "PUID=${UID}"
+#      - "PGID=${GID}"
+#    image: linuxserver/nextcloud
+#    ports:
+#      - 4433:443
+#    restart: unless-stopped
+#    volumes:
+#      - "${MOUNT}/nextcloud/data:/data"
+#      - "${MOUNT}/nextcloud/config:/config"
+#      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
 #  ombi:
 #    environment:
 #      - "PUID=${UID}"
@@ -72,7 +93,39 @@ services:
 #      - 3579:3579
 #    restart: unless-stopped
 #    volumes:
-#      - "${HOME}/.config/ombi:/config"
+#      - "${MOUNT}/ombi:/config"
+  qbittorrent:
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+      - "UMASK_SET=002"
+    image: lsioarmhf/qbittorrent
+    ports:
+      - 6881:6881/tcp
+      - 6881:6881/udp
+      - 8080:8080
+    restart: unless-stopped
+    volumes:
+      - "./data/qb:/config"
+      - "/mnt/bellatrix/downloads:/downloads"
+  syncthing:
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: lsioarmhf/syncthing
+    labels:
+      - ovh.alioth.syncthing
+    ports:
+      - 8384:8384
+      - 22000:22000
+      - 21027:21027/udp
+    restart: unless-stopped
+    volumes:
+      - "./data/syncthing:/config"
+      - "/mnt/antares:/mnt/antares"
+      - "/mnt/bellatrix:/mnt/bellatrix"
 #  znc:
 #    environment:
 #      - "PUID=${UID}"
@@ -82,5 +135,5 @@ services:
 #    ports:
 #      - 6501:6501
 #    volumes:
-#      - "${HOME}/.znc-docker:/config"
+#      - "${MOUNT}/znc:/config"
 version: '3'
