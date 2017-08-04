@@ -15,7 +15,7 @@ services:
     network_mode: "host"
     restart: unless-stopped
     volumes:
-      - "./data/flood:/data"
+      - "${MOUNT}/docker/data/flood:/data"
   syncthing:
     environment:
       - "PGID=${PGID}"
@@ -30,24 +30,58 @@ services:
       - 21027:21027/udp
     restart: unless-stopped
     volumes:
-      - "./data/syncthing:/config"
-      - "${HOME}/library/movies:/mnt/movies"
-   radarr:
-     environment:
+      - "${MOUNT}/docker/data/syncthing:/config"
+      - "${MOUNT}/library/movies:/mnt/movies"
+  radarr:
+    environment:
       - "PGID=${PGID}"
       - "PUID=${PUID}"
       - "TZ=${TZ}"
-     image: linuxserver/radarr
-     labels:
+    image: linuxserver/radarr
+    labels:
       - ovh.dispenser.radarr
     ports:
       - 127.0.0.1:7878:7878
     restart: unless-stopped
     volumes:
-      - "./data/radarr:/config"
-      - "${HOME}/data/movies:/downloads"
-      - "${HOME}/library/movies:/movies"
-#  nextcloud:
+      - "${MOUNT}/docker/data/radarr:/config"
+      - "${MOUNT}/data/movies:/downloads"
+      - "${MOUNT}/library/movies:/movies"
+  deluge:
+    build:
+      context: deluge
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+      - "UMASK_SET=002"
+    labels:
+      - ovh.dispenser.deluge
+    ports:
+      - 8112:8112
+      - 58846:58846
+      - 58946:54946
+      - 58946:58946/udp
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/deluge:/config"
+      #- "${MOUNT}/data:/downloads"
+  couch:
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: linuxserver/couchpotato
+    labels:
+      - ovh.dispenser.couchpotato
+    ports:
+      - 127.0.0.1:5050:5050
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/couch:/config"
+      - "${MOUNT}/data/movies:/downloads"
+      - "${MOUNT}/library/movies:/movies"
+#   nextcloud:
 #    environment:
 #      - "PUID=${UID}"
 #      - "PGID=${GID}"
@@ -56,8 +90,8 @@ services:
 #      - 4433:443
 #    restart: unless-stopped
 #    volumes:
-#      - "${HOME}/nextcloud/data:/data"
-#      - "${HOME}/nextcloud/config:/config"
+#      - "${MOUNT}/nextcloud/data:/data"
+#      - "${MOUNT}/nextcloud/config:/config"
 #      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
 #  znc:
 #    environment:
@@ -69,5 +103,5 @@ services:
 #      - 6501:6501
 #    restart: unless-stopped
 #    volumes:
-#      - "${HOME}/.znc-docker:/config"
-version: '3'
+#      - "${MOUNT}/.znc-docker:/config"
+version: '3.3'
