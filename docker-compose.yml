@@ -58,14 +58,14 @@ services:
     labels:
       - ovh.dispenser.deluge
     ports:
-      - 8112:8112
-      - 58846:58846
-      - 58946:54946
-      - 58946:58946/udp
+      - "8112:8112"
+      - "58846:58846"
+      - "58946:58946"
+      - "58946:58946/udp"
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/deluge:/config"
-      #- "${MOUNT}/data:/downloads"
+      - "${MOUNT}/data:/downloads"
   couch:
     environment:
       - "PGID=${PGID}"
@@ -81,6 +81,33 @@ services:
       - "${MOUNT}/docker/data/couch:/config"
       - "${MOUNT}/data/movies:/downloads"
       - "${MOUNT}/library/movies:/movies"
+  jackett:
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: linuxserver/jackett
+    labels:
+      - ovh.dispenser.jackett
+    ports:
+      - 127.0.0.1:9117:9117
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/jackett:/config"
+      # - "${MOUNT}/blackhole:/downloads"
+  filebot:
+    build:
+      context: filebot
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    labels:
+      ovh.dispenser.filebot: watcher
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/filebot:/config"
+      # - "${MOUNT}/data:/media"
 #   nextcloud:
 #    environment:
 #      - "PUID=${UID}"
@@ -94,6 +121,7 @@ services:
 #      - "${MOUNT}/nextcloud/config:/config"
 #      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
 #  znc:
+#    container_name: znc
 #    environment:
 #      - "PUID=${UID}"
 #      - "PGID=${GID}"
