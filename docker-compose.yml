@@ -3,6 +3,9 @@ services:
   flood:
     build:
       context: flood
+      args:
+        NODE_ENV: production
+        version: master
     environment:
       - "FLOOD_BASE_URI=${FLOOD_BASE_URI:-/}"
       - "FLOOD_SECRET=${FLOOD_SECRET}"
@@ -13,6 +16,8 @@ services:
     labels:
       - ovh.dispenser.flood
     network_mode: "host"
+    # ports:
+    #   - "3000:3000"
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/flood:/data"

@@ -4,9 +4,6 @@
 [submodule "alpine-phantomjs"]
 	path = alpine-phantomjs
 	url = https://github.com/devster31/docker-alpine-phantomjs.git
-[submodule "flood"]
-	path = flood
-	url = https://github.com/jfurrow/flood.git
 [submodule "mailcow"]
 	path = mailcow
 	url = https://github.com/mailcow/mailcow-dockerized.git
