@@ -1,0 +1,55 @@
+FROM node
+
+ARG NODE_ENV
+ARG VERSION
+
+ENV \
+    NODE_ENV="$NODE_ENV" \
+    FLOOD_VERSION="$VERSION"
+
+LABEL \
+    org.label-schema.name="flood" \
+    org.label-schema.vcs-url="https://github.com/jfurrow/flood" \
+    org.label-schema.version="$VERSION" \
+    org.label-schema.schema-version="1.0.0-rc.1"
+
+RUN apk add --update --no-cache --virtual .build-dependencies \
+        curl \
+        g++ \
+        gcc \
+        git \
+        make \
+        tar \
+        xz \
+     && \
+     apk add --update --no-cache \
+         libgcc \
+         libstdc++ \
+    && \
+    curl -SL https://mediaarea.net/download/binary/mediainfo/0.7.98/MediaInfo_CLI_0.7.98_GNU_FromSource.tar.xz | tar -xJvf- -C /tmp && \
+    cd /tmp/MediaInfo_CLI_GNU_FromSource && \
+    ./CLI_Compile.sh && \
+    cd MediaInfo/Project/GNU/CLI && make install && \
+    apk del --purge .build-dependencies && \
+    cd / && rm -rf /tmp/*
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+RUN \
+    apk add --update --no-cache \
+        git \
+    && \
+    git clone https://github.com/jfurrow/flood.git /usr/src/app && \
+    if [ ${FLOOD_VERSION} != 'master' ]; \
+    then \
+        git checkout tags/${FLOOD_VERSION}; \
+    fi && \
+    npm install --porcelain --quiet && npm cache clean --force && \
+    cp /usr/src/app/config.docker.js /usr/src/app/config.js
+
+EXPOSE 3000
+
+VOLUME [ "/data" ]
+
+CMD [ "npm", "start" ]
