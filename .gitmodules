@@ -10,3 +10,9 @@
 [submodule "deluge"]
 	path = deluge
 	url = https://github.com/devster31/docker-deluge.git
+[submodule "beets"]
+	path = beets
+	url = https://github.com/devster31/docker-beets.git
+[submodule "glances"]
+	path = glances
+	url = https://github.com/nicolargo/glances.git
