@@ -1,0 +1,164 @@
+---
+# networks:
+#   hostnet:
+#     external:
+#       name: host
+
+services:
+  # hugo:
+  #   build:
+  #     args:
+  #       OVERLAY_VERSION: v1.21.4.0
+  #       OVERLAY_ARCH: armhf
+  #     context: ../httpd
+  #   container_name: hugo
+  #   environment:
+  #     - "APACHE_UID=${PUID}"
+  #     - "APACHE_GID=${PGID}"
+  #     - "APACHE_DOMAIN=${DOMAIN}"
+  #   image: hugo:alpine
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.port=80
+  #     - traefik.frontend.passHostHeader=true
+  #     - traefik.frontend.rule=HostRegexp:alioth.ovh,{subdomain:[a-z]+}.alioth.ovh,rpi3.local;
+  #       PathPrefix:/hugo-status,/hugo-info
+  #   ports:
+  #     - 8083:80
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "${MOUNT}/hugo:/usr/local/apache2/conf"
+  medusa:
+    container_name: medusa
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    image: "lsioarmhf/medusa"
+    labels:
+      - traefik.enable=true
+      - traefik.port=8081
+      - traefik.frontend.rule=HostRegexp:alioth.ovh,{subdomain:[a-z]+}.alioth.ovh,rpi3.local;PathPrefix:/medusa
+    ports:
+      - "8081:8081"
+    restart: "unless-stopped"
+    volumes:
+      - "${MOUNT}/medusa:/config"
+      - "/mnt:/downloads"
+  nzbget:
+    container_name: nzbget
+    # deploy:
+    #   labels:
+    #     - traefik.enable=true
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    image: "lsioarmhf/nzbget"
+    labels:
+      - traefik.enable=true
+      - traefik.port=6789
+      - traefik.frontend.rule=HostRegexp:alioth.ovh,{subdomain:[a-z]+}.alioth.ovh,rpi3.local;
+        PathPrefixStrip:/nzbget,/nzbget/;
+        ReplacePathRegex:^/?(.+) /$$1
+    ports:
+      - "6789:6789"
+    restart: "unless-stopped"
+    volumes:
+      - "${MOUNT}/nzbget:/config"
+      - "/mnt/bellatrix/downloads/nzbget:/downloads"
+  # portainer:
+  #   container_name: portainer
+  #   image: portainer/portainer
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.port=9000
+  #     - traefik.frontend.rule=Host:alioth.ovh,rpi3.local;
+  #       PathPrefixStrip:/portainer,/portainer/
+  #   ports:
+  #     - 9000:9000
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #     - "${MOUNT}/portainer:/data"
+  traefik:
+    command:
+      # - --debug
+      - --loglevel=INFO
+      - --defaultentrypoints=http,https
+      - --entryPoints=Name:local Address::800 WhiteListSourceRange:10.0.0.1/16,172.16.0.1/24,::ffff:a00:1/16,::ffff:ac10:1/24
+      - --entryPoints=Name:http Address::80 Redirect.EntryPoint:https
+      - --entryPoints=Name:https Address::443 Compress:true
+          TLS:/certs/${DOMAIN}.crt,/certs/${DOMAIN}.key TLS.MinVersion:VersionTLS12
+          TLS.CipherSuites:["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305","TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256","TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"]
+      - --entryPoints=Name:api Address::8080
+      - --api.entrypoint=api
+      - --acme=true
+      - --acme.acmelogging=true
+      - --acme.email=${EMAIL}
+      - --acme.domains=${DOMAIN},home.${DOMAIN}
+      - --acme.storage=/etc/traefik/acme.json
+      - --acme.entrypoint=https
+      - --acme.onhostrule=true
+      - --acme.dnschallenge=true
+      - --acme.dnschallenge.provider=cloudflare
+      - --acme.tlsconfig=true
+      - --docker=true
+      - --docker.debugloggeneratedtemplate=true
+      - --docker.domain='${DOMAIN}'
+      # - --docker.endpoint='unix:///var/run/docker.sock'
+      - --docker.exposedbydefault=false
+      - --docker.usebindportip=true
+      - --docker.watch=true
+      - --file=true
+      - --file.filename=/etc/traefik/external.toml
+      - --file.watch=true
+    container_name: traefik
+    environment:
+      CLOUDFLARE_API_KEY: "${CLOUDFLARE_API_KEY}"
+      CLOUDFLARE_EMAIL: "${EMAIL}"
+    # image: traefik
+    image: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${MOUNT}/traefik:/etc/traefik"
+      - "${MOUNT}/lego/certificates:/certs"
+  # watchtower:
+  #   container_name: watchtower
+  #   environment:
+  #     - "TZ=${TZ}"
+  #   image: v2tec/watchtower
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #     - "${MOUNT}/watchtower/config.json:/config.json"
+  webdav:
+    build:
+      args:
+        OVERLAY_VERSION: v1.21.4.0
+        OVERLAY_ARCH: armhf
+      context: ../httpd
+    container_name: webdav
+    environment:
+      - "APACHE_UID=${PUID}"
+      - "APACHE_GID=${PGID}"
+      - "APACHE_DOMAIN=${DOMAIN}"
+    image: webdav:alpine
+    labels:
+      - traefik.enable=true
+      - traefik.port=80
+      - traefik.frontend.passHostHeader=true
+      - traefik.frontend.rule=HostRegexp:alioth.ovh,{subdomain:[a-z]+}.alioth.ovh,rpi3.local;
+        PathPrefix:/webdav,/webdav/,/server-status,/server-info
+    ports:
+      - 8082:80
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/httpd/conf/extra:/usr/local/apache2/conf/extra"
+      - "${MOUNT}/httpd/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf"
+      - "/mnt:/DAV:ro"
+version: '3.5'
