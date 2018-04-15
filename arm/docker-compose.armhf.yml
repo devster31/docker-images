@@ -60,7 +60,9 @@ services:
       - traefik.port=6789
       - traefik.frontend.rule=HostRegexp:alioth.ovh,{subdomain:[a-z]+}.alioth.ovh,rpi3.local;
         PathPrefixStrip:/nzbget,/nzbget/;
-        ReplacePathRegex:^/?(.+) /$$1
+        # ReplacePathRegex:^/?(.+) /$$1
+      # - traefik.frontend.redirect.regex=(.*)/nzbget[^/]?$$
+      # - traefik.frontend.redirect.replacement=$$1/nzbget/
     ports:
       - "6789:6789"
     restart: "unless-stopped"
@@ -128,6 +130,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "${MOUNT}/traefik:/etc/traefik"
       - "${MOUNT}/lego/certificates:/certs"
+  # https://hub.docker.com/r/v2tec/watchtower/
   # watchtower:
   #   container_name: watchtower
   #   environment:
