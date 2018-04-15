@@ -109,6 +109,22 @@ services:
       - "${MOUNT}/docker/data/couch:/config"
       - "${MOUNT}/data/movies:/downloads"
       - "${MOUNT}/library/movies:/movies"
+  sonarr:
+    container_name: sonarr
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: linuxserver/sonarr
+    labels:
+      ovh.dispenser.service: "sonarr"
+    ports:
+      - 127.0.0.1:8989:8989
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/sonarr:/config"
+      - "${MOUNT}/data/tv:/downloads"
+      - "${MOUNT}/library/tv:/tv"
   jackett:
     container_name: jackett
     environment:
