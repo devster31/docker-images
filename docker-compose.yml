@@ -130,6 +130,15 @@ services:
       - "TZ=${TZ}"
     labels:
       ovh.dispenser.filebot: watcher
+  znc:
+    container_name: znc
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    image: linuxserver/znc
+    ports:
+      - "6501:6501"
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/filebot:/config"
@@ -146,16 +155,5 @@ services:
 #      - "${MOUNT}/nextcloud/data:/data"
 #      - "${MOUNT}/nextcloud/config:/config"
 #      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
-#  znc:
-#    container_name: znc
-#    environment:
-#      - "PUID=${UID}"
-#      - "PGID=${GID}"
-#      - "TZ=${TZ}"
-#    image: linuxserver/znc
-#    ports:
-#      - 6501:6501
-#    restart: unless-stopped
-#    volumes:
-#      - "${MOUNT}/.znc-docker:/config"
+      - "${MOUNT}/.znc-docker:/config"
 version: '3.5'
