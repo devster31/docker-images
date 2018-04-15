@@ -36,22 +36,38 @@ services:
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/syncthing:/config"
-      - "${MOUNT}/library/movies:/mnt/movies"
-  radarr:
+      - "${MOUNT}/library/movies:/mnt/library/movies"
+      - "${MOUNT}/data/movies:/mnt/data/movies"
+  # radarr:
+  #   container_name: radarr
+  #   environment:
+  #     - "PGID=${PGID}"
+  #     - "PUID=${PUID}"
+  #     - "TZ=${TZ}"
+  #   image: linuxserver/radarr
+  #   labels:
+  #     ovh.dispenser.service: "radarr"
+  #   ports:
+  #     - "127.0.0.1:7878:7878"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "${MOUNT}/docker/data/radarr:/config"
+  #     - "${MOUNT}/data/movies:/downloads"
+  #     - "${MOUNT}/library/movies:/movies"
+  nzbget:
     environment:
-      - "PGID=${PGID}"
       - "PUID=${PUID}"
+      - "PGID=${PGID}"
       - "TZ=${TZ}"
-    image: linuxserver/radarr
+    image: "linuxserver/nzbget"
     labels:
-      - ovh.dispenser.radarr
+      ovh.dispenser.service: "nzbget"
     ports:
-      - 127.0.0.1:7878:7878
-    restart: unless-stopped
+      - "6789:6789"
+    restart: "unless-stopped"
     volumes:
-      - "${MOUNT}/docker/data/radarr:/config"
-      - "${MOUNT}/data/movies:/downloads"
-      - "${MOUNT}/library/movies:/movies"
+      - "${MOUNT}/docker/data/nzbget:/config"
+      - "${MOUNT}/nzbget:/downloads"
   deluge:
     build:
       context: deluge
