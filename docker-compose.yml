@@ -22,17 +22,18 @@ services:
     volumes:
       - "${MOUNT}/docker/data/flood:/data"
   syncthing:
+    container_name: seedbox_syncthing
     environment:
       - "PGID=${PGID}"
       - "PUID=${PUID}"
       - "TZ=${TZ}"
     image: linuxserver/syncthing
     labels:
-      - ovh.dispenser.syncthing
+      ovh.dispenser.service: "syncthing"
     ports:
-      - 8384:8384
-      - 22000:22000
-      - 21027:21027/udp
+      - "127.0.0.1:8384:8384"
+      - "22000:22000"
+      - "21027:21027/udp"
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/syncthing:/config"
