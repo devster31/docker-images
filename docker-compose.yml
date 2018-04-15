@@ -110,13 +110,14 @@ services:
       - "${MOUNT}/data/movies:/downloads"
       - "${MOUNT}/library/movies:/movies"
   jackett:
+    container_name: jackett
     environment:
       - "PGID=${PGID}"
       - "PUID=${PUID}"
       - "TZ=${TZ}"
     image: linuxserver/jackett
     labels:
-      - ovh.dispenser.jackett
+      ovh.dispenser.service: "jackett"
     ports:
       - 127.0.0.1:9117:9117
     restart: unless-stopped
