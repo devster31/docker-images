@@ -1,0 +1,136 @@
+---
+# networks:
+#   hostnet:
+#     external:
+#       name: host
+
+services:
+  aria2:
+    build:
+      context: aria2
+      dockerfile: Dockerfile.cli
+    command:
+      - "--dir=/downloads"
+      - "--log=-"
+      - "--log-level=notice"
+      - "--max-concurrent-downloads=10"
+      - "--quiet"
+      - "--input-file=/config/aria2.session"
+      - "--save-session=/config/aria2.session"
+      - "--follow-torrent=mem"
+      - "--follow-metalink=mem"
+      - "--seed-ratio=1.5"
+      - "--seed-time=20160"
+      - "--enable-rpc"
+      - "--rpc-listen-all=true"
+      - "--rpc-listen-port=${RPC_PORT}"
+      - "--rpc-secret='${RPC_SECRET}'"
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "TZ=${TZ}"
+    ports:
+      - "${RPC_PORT}:${RPC_PORT}"
+    restart: unless-stopped
+    volumes:
+      - /mnt/antares/downloads/aria2:/downloads
+      - "${MOUNT}/aria2:/config"
+  aria2-webui:
+    build:
+      context: aria2
+      dockerfile: Dockerfile.webui
+    depends_on:
+      - aria2
+    environment:
+      - "PUID=${UID}"
+      - "PGID=${GID}"
+      - "RPC_HOST=${RPC_HOST}"
+      - "RPC_PORT=${RPC_PORT}"
+      - "RPC_SECRET=${RPC_SECRET}"
+      - "TZ=${TZ}"
+    ports:
+      - 8080:80
+  beets:
+    build:
+      context: ../beets
+      dockerfile: Dockerfile.arm
+      args:
+        VERSION: 1.4.5
+        AUDIOTOOLS_VERSION: 3.1.1
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    image: devster/beets
+    ports:
+      - 8337:8337
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/beets:/config"
+      # - "${HOME}/data/music:/downloads"
+      # - "${HOME}/library/music:/music"
+  couchpotato:
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: "lsioarmhf/couchpotato"
+    ports:
+      - "5050:5050"
+    restart: "unless-stopped"
+    volumes:
+      - "${MOUNT}/couchpotato:/config"
+      - "/mnt/bellatrix:/downloads"
+      - "/mnt/antares/Media:/movies"
+  glances:
+    build:
+      context: "../glances/docker"
+      args:
+        VERSION: 2.11.1
+    container_name: rpi3_glances
+    environment:
+      - "GLANCES_OPT=-w"
+    image: "glances"
+    pid: "host"
+    ports:
+      # - "127.0.0.1:61208-61209:61208-61209"
+      - "61208-61209:61208-61209"
+    restart: "unless-stopped"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "${MOUNT}/glances:/glances"
+  glances_dev:
+    build:
+      context: "../glances/docker"
+      dockerfile: Dockerfile.develop
+    container_name: rpi3_glances_dev
+    environment:
+      - "GLANCES_OPT=-w"
+    image: "glances:develop"
+    network_mode: "host"
+    pid: "host"
+    # ports:
+      # - "127.0.0.1:61208-61209:61208-61209"
+      # - "61208-61209:61208-61209"
+    restart: "unless-stopped"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "${MOUNT}/glances:/glances"
+  syncthing:
+    container_name: rpi3_syncthing
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: lsioarmhf/syncthing
+    labels:
+      - ovh.alioth.syncthing
+    ports:
+      - 8384:8384
+      - 22000:22000
+      - 21027:21027/udp
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/syncthing:/config"
+      - "/mnt/antares:/mnt/antares"
+      - "/mnt/bellatrix:/mnt/bellatrix"
