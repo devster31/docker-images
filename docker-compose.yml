@@ -140,15 +140,147 @@ services:
     volumes:
       - "${MOUNT}/docker/data/jackett:/config"
       # - "${MOUNT}/blackhole:/downloads"
-  filebot:
-    build:
-      context: filebot
+  # glances:
+  #   build:
+  #     context: "glances/docker"
+  #     args:
+  #       VERSION: 2.10
+  #   container_name: "glances"
+  #   environment:
+  #     - "GLANCES_OPT=-w"
+  #   labels:
+  #     ovh.dispenser.service: "glances"
+  #   pid: "host"
+  #   ports:
+  #     # - "127.0.0.1:61208-61209:61208-61209"
+  #     - "61208-61209:61208-61209"
+  #   restart: "unless-stopped"
+  #   volumes:
+  #     - "/var/run/docker.sock:/var/run/docker.sock:ro"
+  #     - "${MOUNT}/docker/data/glances:/glances"
+  organizr:
+    container_name: organizr
     environment:
       - "PGID=${PGID}"
       - "PUID=${PUID}"
       - "TZ=${TZ}"
+    image: lsiocommunity/organizr
     labels:
-      ovh.dispenser.filebot: watcher
+      ovh.dispenser: "organizr"
+    ports:
+      - "127.0.0.1:8095:80"
+    restart: "unless-stopped"
+    volumes:
+      - "${MOUNT}/docker/data/organizr:/config"
+  # muximux:
+  #   environment:
+  #     - "PGID=${PGID}"
+  #     - "PUID=${PUID}"
+  #     - "TZ=${TZ}"
+  #   image: linuxserver/muximux
+  #   labels:
+  #     ovh.dispenser.service: "muximux"
+  #   ports:
+  #     "127.0.0.1:8094:80"
+  #   restart: "unless-stopped"
+  #   volumes:
+  #     - "${MOUNT}/docker/data/muximux:/config"
+  # filebot:
+  #   build:
+  #     context: filebot
+  #     args:
+  #       MEDIAINFO_VERSION: 0.7.98
+  #       WEBHOOK_VERSION: master
+  #       TAILON_VERSION: 1.3.0
+  #   environment:
+  #     - "PGID=${PGID}"
+  #     - "PUID=${PUID}"
+  #     - "TZ=${TZ}"
+  #     - "TAILON_PORT=8080"
+  #     - "TAILON_ROOT=/tailon/"
+  #     - "WEBHOOK_ROOT=hooks"
+  #   labels:
+  #     ovh.dispenser.service: "filebot"
+  #     # ovh.dispenser.filebot: "watcher"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "${MOUNT}/docker/data/filebot:/config"
+  #     # - "${MOUNT}/data:/media"
+  # php-apache:
+  #   # requires ruTorrent dir to be writable by uid 33 or gid 33 (www-data)
+  #   image: php:7.1-apache
+  #   network_mode: "host"
+  #   # ports:
+  #   #  - "8080:80"
+  #   volumes:
+  #     - "${MOUNT}/docker/ruTorrent:/var/www/html"
+  #     - "${MOUNT}/docker/data/ports.conf:/etc/apache2/ports.conf"
+      # contains: |
+      # # If you just change the port or add more ports here, you will likely also
+      # # have to change the VirtualHost statement in
+      # # /etc/apache2/sites-enabled/000-default.conf
+      # Listen 8080
+      # <IfModule ssl_module>
+      #     Listen 443
+      # </IfModule>
+      # <IfModule mod_gnutls.c>
+      #     Listen 443
+      # </IfModule>
+      # # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+  # nextcloud:
+  #  environment:
+  #    - "PUID=${UID}"
+  #    - "PGID=${GID}"
+  #  image: linuxserver/nextcloud
+  #  ports:
+  #    - 4433:443
+  #  restart: unless-stopped
+  #  volumes:
+  #    - "${MOUNT}/nextcloud/data:/data"
+  #    - "${MOUNT}/nextcloud/config:/config"
+  #    - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
+  plex:
+    container_name: plex
+    environment:
+      - "TZ=${TZ}"
+      - "PLEX_UID=108"
+      - "PLEX_GID=116"
+      - "PLEX_CLAIM=claim-mRZZo3FLk6XzGu2Q2mFz"
+      - "CHANGE_CONFIG_DIR_OWNERSHIP=false"
+      - "ADVERTISE_IP=http://91.121.108.175:32400/"
+    # - "ALLOWED_NETWORKS=192.168.1.0/24,172.16.0.0/16"
+    hostname: "dispenser"
+    image: plexinc/pms-docker:plexpass
+    ports:
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32400:32400/tcp
+      - 32469:32469/tcp
+    # - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+      - 33400:33400/tcp
+      - 33443:33443/tcp
+    restart: unless-stopped
+    volumes:
+      - "/var/lib/plexmediaserver:/config"
+      - "/tmp/plex_transcode:/transcode"
+      - "/home/devsterknight/library:/data:ro"
+  # plexrequests:
+  #   container_name: plexrequests
+  #   environment:
+  #     - "PUID=${PUID}"
+  #     - "PGID=${PGID}"
+  #     - "URL_BASE=/plexrequests"
+  #     - "TZ=${TZ}"
+  #   image: linuxserver/plexrequests
+  #   ports:
+  #     - 3003:3000
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "${MOUNT}/docker/data/plexrequests:/config"
   ombi:
     container_name: ombi
     environment:
@@ -200,19 +332,5 @@ services:
       - "6501:6501"
     restart: unless-stopped
     volumes:
-      - "${MOUNT}/docker/data/filebot:/config"
-      # - "${MOUNT}/data:/media"
-#   nextcloud:
-#    environment:
-#      - "PUID=${UID}"
-#      - "PGID=${GID}"
-#    image: linuxserver/nextcloud
-#    ports:
-#      - 4433:443
-#    restart: unless-stopped
-#    volumes:
-#      - "${MOUNT}/nextcloud/data:/data"
-#      - "${MOUNT}/nextcloud/config:/config"
-#      - "/etc/letsencrypt/live/${DOMAIN}:/config/keys"
       - "${MOUNT}/.znc-docker:/config"
 version: '3.5'
