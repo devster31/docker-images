@@ -1,6 +1,3 @@
-[submodule "resin-io-base"]
-	path = resin-io-base
-	url = https://github.com/resin-io-library/base-images.git
 [submodule "alpine-phantomjs"]
 	path = alpine-phantomjs
 	url = https://github.com/devster31/docker-alpine-phantomjs.git
