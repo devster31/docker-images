@@ -93,13 +93,14 @@ services:
       - "${MOUNT}/docker/data/deluge:/config"
       - "${MOUNT}/data:/downloads"
   couch:
+    container_name: couch
     environment:
       - "PGID=${PGID}"
       - "PUID=${PUID}"
       - "TZ=${TZ}"
     image: linuxserver/couchpotato
     labels:
-      - ovh.dispenser.couchpotato
+      ovh.dispenser.service: "couchpotato"
     ports:
       - 127.0.0.1:5050:5050
     restart: unless-stopped
