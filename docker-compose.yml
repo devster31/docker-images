@@ -4,8 +4,9 @@ services:
     build:
       context: flood
       args:
+        MEDIAINFO_VERSION: 0.7.98
         NODE_ENV: production
-        version: master
+        VERSION: master
     environment:
       - "FLOOD_BASE_URI=${FLOOD_BASE_URI:-/}"
       - "FLOOD_SECRET=${FLOOD_SECRET}"
@@ -14,7 +15,7 @@ services:
       - "RTORRENT_SOCK=${RTORRENT_SOCK:-false}"
       - "FLOOD_ENABLE_SSL=${FLOOD_ENABLE_SSL:-false}"
     labels:
-      - ovh.dispenser.flood
+      ovh.dispenser.service: "flood"
     network_mode: "host"
     # ports:
     #   - "3000:3000"
