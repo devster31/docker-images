@@ -144,8 +144,33 @@ services:
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/ombi:/config"
-      - "TZ=${TZ}"
+  hydra2:
+    container_name: hydra2
+    environment:
+      - "PUID=${PUID}"
       - "PGID=${PGID}"
+      - "URL_BASE=/hydra2"
+      - "TZ=${TZ}"
+    image: linuxserver/hydra2
+    ports:
+      - 127.0.0.1:5076:5076
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/hydra2:/config"
+      - "${MOUNT}/nzbget/completed:/downloads"
+  tautulli:
+    container_name: tautulli
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    image: linuxserver/tautulli
+    ports:
+      - "8181:8181"
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/tautulli:/config"
+      - "/var/lib/plexmediaserver/Library/Application Support/Plex Media Server/Logs/:/logs:ro"
   znc:
     container_name: znc
     environment:
