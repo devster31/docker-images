@@ -67,22 +67,6 @@ services:
       - "${MOUNT}/docker/data/syncthing:/config"
       - "${MOUNT}/library/movies:/mnt/library/movies"
       - "${MOUNT}/data/movies:/mnt/data/movies"
-  # radarr:
-  #   container_name: radarr
-  #   environment:
-  #     - "PGID=${PGID}"
-  #     - "PUID=${PUID}"
-  #     - "TZ=${TZ}"
-  #   image: linuxserver/radarr
-  #   labels:
-  #     ovh.dispenser.service: "radarr"
-  #   ports:
-  #     - "127.0.0.1:7878:7878"
-  #   restart: unless-stopped
-  #   volumes:
-  #     - "${MOUNT}/docker/data/radarr:/config"
-  #     - "${MOUNT}/data/movies:/downloads"
-  #     - "${MOUNT}/library/movies:/movies"
   nzbget:
     environment:
       - "PUID=${PUID}"
@@ -121,22 +105,22 @@ services:
     volumes:
       - "${MOUNT}/docker/data/deluge:/config"
       - "${MOUNT}/data:/downloads"
-  couch:
-    container_name: couch
-    environment:
-      - "PGID=${PGID}"
-      - "PUID=${PUID}"
-      - "TZ=${TZ}"
-    image: linuxserver/couchpotato
-    labels:
-      ovh.dispenser.service: "couchpotato"
-    ports:
-      - 127.0.0.1:5050:5050
-    restart: unless-stopped
-    volumes:
-      - "${MOUNT}/docker/data/couch:/config"
-      - "${MOUNT}/data/movies:/downloads"
-      - "${MOUNT}/library/movies:/movies"
+  # couch:
+  #   container_name: couch
+  #   environment:
+  #     - "PGID=${PGID}"
+  #     - "PUID=${PUID}"
+  #     - "TZ=${TZ}"
+  #   image: linuxserver/couchpotato
+  #   labels:
+  #     ovh.dispenser.service: "couchpotato"
+  #   ports:
+  #     - 127.0.0.1:5050:5050
+  #   restart: unless-stopped
+  #   volumes:
+  #     - "${MOUNT}/docker/data/couch:/config"
+  #     - "${MOUNT}/data/movies:/downloads"
+  #     - "${MOUNT}/library/movies:/movies"
   sonarr:
     container_name: sonarr
     environment:
@@ -151,8 +135,25 @@ services:
     restart: unless-stopped
     volumes:
       - "${MOUNT}/docker/data/sonarr:/config"
-      - "${MOUNT}/data/tv:/downloads"
-      - "${MOUNT}/library/tv:/tv"
+      - "${MOUNT}/data/sonarr:${MOUNT}/data/sonarr"
+      - "${MOUNT}/nzbget/completed/Sonarr:/downloads/completed/Sonarr"
+      - "${MOUNT}/library/TV Shows:/tv"
+  radarr:
+    container_name: radarr
+    environment:
+      - "PGID=${PGID}"
+      - "PUID=${PUID}"
+      - "TZ=${TZ}"
+    image: linuxserver/radarr
+    labels:
+      ovh.dispenser.service: "radarr"
+    ports:
+      - 127.0.0.1:7878:7878
+    restart: unless-stopped
+    volumes:
+      - "${MOUNT}/docker/data/radarr:/config"
+      - "${MOUNT}/nzbget/completed/Radarr:/downloads/completed/Radarr"
+      - "${MOUNT}/library/Movies:/movies"
   jackett:
     container_name: jackett
     environment:
