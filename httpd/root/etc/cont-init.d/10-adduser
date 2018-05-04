@@ -1,0 +1,17 @@
+#!/usr/bin/with-contenv bash
+
+APACHE_GID=${APACHE_GID:-82}
+APACHE_UID=${APACHE_UID:-82}
+
+groupmod -o -g "$APACHE_GID" www-data
+usermod -o -u "$APACHE_UID" www-data
+
+echo '
+-------------------------------------
+GID/UID
+-------------------------------------'
+echo "
+Apache uid:    $(id -u www-data)
+Apache gid:    $(id -g www-data)
+-------------------------------------
+"

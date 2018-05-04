@@ -161,7 +161,7 @@ services:
       - 8082:80
     restart: unless-stopped
     volumes:
-      - "${MOUNT}/httpd/conf/extra:/usr/local/apache2/conf/extra"
-      - "${MOUNT}/httpd/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf"
+      # - "${MOUNT}/httpd/conf/extra:/usr/local/apache2/conf/extra"
+      # - "${MOUNT}/httpd/conf/httpd.conf:/usr/local/apache2/conf/httpd.conf"
       - "/mnt:/DAV:ro"
 version: '3.5'
